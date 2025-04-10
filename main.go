@@ -5,12 +5,12 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
+	"net"
 	"os"
 )
 
 func main() {
-	fmt.Println(generateKeys())
+	sendMessage("0.0.0.0:8080", "Hello world")
 }
 
 func generateKeys() (*rsa.PrivateKey, error) {
@@ -23,4 +23,10 @@ func generateKeys() (*rsa.PrivateKey, error) {
 	})
 
 	return privateKey, nil
+}
+
+func sendMessage(recipientAddress, message string) {
+	conn, _ := net.Dial("tcp", recipientAddress)
+
+	conn.Write([]byte(message))
 }
