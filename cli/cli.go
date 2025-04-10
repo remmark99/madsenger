@@ -5,12 +5,21 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 func main() {
-	sendMessage("0.0.0.0:8080", "Hello world")
+	command := os.Args[1]
+
+	switch command {
+	case "send":
+		recepient := os.Args[2]
+		message := strings.Join(os.Args[3:]," ")
+		sendMessage(recepient, message)
+	}
 }
 
 func generateKeys() (*rsa.PrivateKey, error) {
@@ -29,4 +38,6 @@ func sendMessage(recipientAddress, message string) {
 	conn, _ := net.Dial("tcp", recipientAddress)
 
 	conn.Write([]byte(message))
+
+	fmt.Println("Message sent!")
 }
