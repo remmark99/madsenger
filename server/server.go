@@ -1,29 +1,29 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"madsenger/internal/handlers"
 	"net"
 )
 
 func main() {
-	listener, _ := net.Listen("tcp", ":8080")
+	go startListening(":8080", handlers.HandleClientConnection)
+	go startListening(":8081", handlers.HandleGTUIConnection)
+}
+
+func startListening(port string, handler func(net.Conn)) {
+	listener, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("Failed to listen on port %s: %v\n", port, err)
+	}
+	defer listener.Close()
 
 	for {
-		conn, _ := listener.Accept()
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Printf("Failed to accept connection: %v\n", err)
+		}
 
-		go handleConnection(conn)
+		go handler(conn)
 	}
-}
-
-func handleConnection(conn net.Conn) {
-	defer conn.Close()
-
-	buf := make([]byte, 1024)
-	n, _ := conn.Read(buf)
-
-	fmt.Printf("%s says: %s\n", getSender(conn), string(buf[:n]))
-}
-
-func getSender(conn net.Conn) (string) {
-	return conn.RemoteAddr().(*net.IPAddr).IP.String()
 }
